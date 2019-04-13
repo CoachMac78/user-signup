@@ -17,15 +17,15 @@ def gather_info():
     if not(user_name):
         error = "You must complete this field."
         return render_template('sign-up-home.html', 
-            username_error = error)
+            username_error = error, username = user_name)
     if not(password):
         error = "You must complete this field."
         return render_template('sign-up-home.html', 
-            password_error = error)
+            password_error = error, username = user_name)
     if not(verify_password):
         error = "You must complete this field."
         return render_template('sign-up-home.html', 
-            verify_password_error = error)
+            verify_password_error = error, username = user_name)
     
     if len(user_name) < 3 or len(user_name) > 20:
         error = user_name + " is not a valid username. Enter a username between 3-20 characters."
@@ -39,48 +39,50 @@ def gather_info():
     if len(password) < 3 or len(password) > 20:
         error = "Password is not a valid. Enter a password between 3-20 characters."
         # redirect to homepage, and include error as a query parameter in the URL
-        return render_template('sign-up-home.html', password_error = error )
+        return render_template('sign-up-home.html', password_error = error, username = user_name )
 
     if " " in password:
         error = "Passwords cannot contain spaces. Please try again."
-        return render_template('sign-up-home.html', password_error = error )
+        return render_template('sign-up-home.html', password_error = error, username = user_name )
 
     if not(verify_password == password):
         error ="Does not match the password entered. Please try again"
-        return render_template('sign-up-home.html', verify_password_error = error )
+        return render_template('sign-up-home.html', verify_password_error = error, username = user_name )
 
     if not(email):
         pass
-    elif email:
+    else:
+        total_at = 0
         for char in email:
-            total_at = 0
             if char == "@":
                 total_at += 1
 
-            if not(total_at == 1):
-                error = "Not a valid email. Please try again."
-                return render_template('sign-up-home.html', email_error = error, email = email)
-            else:
-                pass
+        if total_at != 1:
+            error = "Too many @'s. Not a valid email. Please try again."
+            return render_template('sign-up-home.html', 
+            email_error = error, email = email, username = user_name)
+
+        total_period = 0    
         for char in email:
-            total_period = 0
             if char == ".":
                 total_period += 1
         
-            if not(total_period == 1):
-                error = "Not a valid email. Please try again."
-                return render_template('sign-up-home.html', email_error = error, email = email )
-            else:
-                pass
+        if total_period != 1:
+            error = "Too many periods. Not a valid email. Please try again."
+            return render_template('sign-up-home.html', 
+            email_error = error, email = email, username = user_name )
+            
         if len(email) < 3 or len(email) > 20:
-            error = "Not a valid email. Please try again."
-            return render_template('sign-up-home.html', email_error = error, email = email )
+            error = "Too long. Not a valid email. Please try again."
+            return render_template('sign-up-home.html', 
+            email_error = error, email = email, username = user_name )
         if " " in email:
-            error = "Not a valid email. Please try again."
-            return render_template('sign-up-home.html', email_error = error, email = email )
-    return render_template("welcome.html", username=user_name)
+            error = "No spaces allowed. Not a valid email. Please try again."
+            return render_template('sign-up-home.html', 
+            email_error = error, email = email, username = user_name )
+    return welcome()
 
-@app.route("/welcome")
+@app.route("/welcome", methods=['POST'])
 def welcome():
     user_name = request.form['username']
     return render_template("welcome.html", username=user_name)
